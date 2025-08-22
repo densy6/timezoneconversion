@@ -1,0 +1,108 @@
+import React, { useState } from "react";
+
+const statesWithTimezones = {
+  "New York": "EST",
+  "California": "PST",
+  "Texas": "CST",
+  "Florida": "EST",
+  "Illinois": "CST",
+};
+
+const convertToCST = (hour, fromTimezone) => {
+  const offsets = { EST: -1, CST: 0, PST: 2 }; // CST as base
+  return hour + offsets[fromTimezone];
+};
+
+const TimezoneConverter = () => {
+  const [state, setState] = useState("New York");
+  const [startTime, setStartTime] = useState(12);
+  const [endTime, setEndTime] = useState(16);
+  const [convertedStart, setConvertedStart] = useState(null);
+  const [convertedEnd, setConvertedEnd] = useState(null);
+  const [monitorStart, setMonitorStart] = useState(null);
+  const [monitorEnd, setMonitorEnd] = useState(null);
+
+  const handleConvert = () => {
+    const fromTimezone = statesWithTimezones[state];
+    const startCST = convertToCST(startTime, fromTimezone);
+    const endCST = convertToCST(endTime, fromTimezone);
+
+    setConvertedStart(startCST);
+    setConvertedEnd(endCST);
+    setMonitorStart(startCST - 1);
+    setMonitorEnd(endCST + 1);
+  };
+
+  return (
+    <div style={{ fontFamily: "Arial", maxWidth: "600px", margin: "auto" }}>
+      <h2 style={{ textAlign: "center" }}>Campaign Time Converter</h2>
+
+      <label>Select State:</label>
+      <select
+        value={state}
+        onChange={(e) => setState(e.target.value)}
+        style={{ margin: "10px", padding: "5px" }}
+      >
+        {Object.keys(statesWithTimezones).map((st) => (
+          <option key={st} value={st}>
+            {st}
+          </option>
+        ))}
+      </select>
+
+      <div style={{ marginTop: "10px" }}>
+        <label>Start Time (in {statesWithTimezones[state]}): </label>
+        <input
+          type="number"
+          min="0"
+          max="23"
+          value={startTime}
+          onChange={(e) => setStartTime(Number(e.target.value))}
+          style={{ width: "50px", marginLeft: "10px" }}
+        />
+        <span> :00</span>
+      </div>
+
+      <div style={{ marginTop: "10px" }}>
+        <label>End Time (in {statesWithTimezones[state]}): </label>
+        <input
+          type="number"
+          min="0"
+          max="23"
+          value={endTime}
+          onChange={(e) => setEndTime(Number(e.target.value))}
+          style={{ width: "50px", marginLeft: "10px" }}
+        />
+        <span> :00</span>
+      </div>
+
+      <button
+        onClick={handleConvert}
+        style={{
+          marginTop: "20px",
+          padding: "10px",
+          backgroundColor: "#4CAF50",
+          color: "white",
+          border: "none",
+          cursor: "pointer",
+        }}
+      >
+        Convert to CST
+      </button>
+
+      {convertedStart !== null && (
+        <div style={{ marginTop: "20px" }}>
+          <h3>Converted Times (CST)</h3>
+          <p>
+            <strong>Campaign Live Window:</strong> {convertedStart}:00 – {convertedEnd}:00 CST
+          </p>
+          <p>
+            <strong>Monitoring Window (with buffer):</strong> {monitorStart}:00 – {monitorEnd}:00 CST
+          </p>
+        </div>
+      )}
+    </div>
+  );
+};
+
+export default TimezoneConverter;
